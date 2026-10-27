@@ -11,9 +11,9 @@ def k_space(k_min, k_max, n_points):
     n_points (int): Number of points in the k-space.
     """
 
-    k = np.linspace(k_min, k_max, n_points)
-    dk = k[1] - k[0]
-    return k, dk
+    k = np.exp(np.linspace(np.log(k_min), np.log(k_max), n_points))
+    dlnk = np.log(k[1]) - np.log(k[0])
+    return k, dlnk
 
 def initial_condition(A, k, p):
     """
@@ -26,7 +26,7 @@ def initial_condition(A, k, p):
 
     return A * (k**(p))
 
-def dndk(n, dk):
+def dndk(n, k, dlnk):
     """
     Calculate the derivative of n with respect to k.
     Parameters:
@@ -34,13 +34,13 @@ def dndk(n, dk):
     dk (float): Step size in k-space.
     """
     dn_dk = np.zeros_like(n)
-    dn_dk[1:-1] = (n[2:] - n[:-2]) / (2 * dk)
+    dn_dk[1:-1] = (n[2:] - n[:-2]) / (2 * dlnk)
 
     # Handle the boundaries using forward and backward differences
-    dn_dk[0] = (n[1] - n[0]) / dk
-    dn_dk[-1] = (n[-1]- n[-2]) / dk
+    dn_dk[0] = (n[1] - n[0]) / dlnk
+    dn_dk[-1] = (n[-1]- n[-2]) / dlnk
 
-    return dn_dk
+    return dn_dk/k
 
 def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 
@@ -65,10 +65,10 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 
     return n
 
-def rhs(n, k, n_left_fix, dk , c):
+def rhs(t, n, k, n_left_fix, dlnk , c):
     
     n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2)
-    dn = dndk(n, dk)
+    dn = dndk(n, k, dlnk)
     dndt = c*dn
     dndt[:6] = 0.0
 
@@ -100,3 +100,26 @@ def integrate(rhs, n0, t_span, dt, *rhs_args):
 
     return np.array(ts), np.array(ns)
 
+def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
+
+    n_snapshots = n_snap
+    idx = np.linspace(0, len(ts) - 1, n_snapshots).astype(int)
+    colors = plt.cm.viridis(np.linspace(0, 1, n_snapshots))
+
+    fig, ax = plt.subplots()
+    for i, j in enumerate(idx):
+        ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2f}")
+
+    ax.set_title("Numerical integration of the transport equation")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("k")
+    ax.set_ylabel(r"$n_k$")
+    ax.legend()
+    ax.grid(True, which="both", ls="--", lw=0.4)
+
+    if save_path:
+        plt.savefig(save_path, dpi = 150)
+    if show:
+        plt.show()
+    plt.close()

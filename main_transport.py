@@ -1,0 +1,13 @@
+from transport import k_space, initial_condition, rhs, apply_bc, dndk, integrate, plot_results
+
+c = 1.0
+n_left_fix = 6
+k, dlnk = k_space(1e-3, 10, 100)
+n_k = initial_condition(1.0, k, -5/6)
+rhs_args = (k, n_left_fix, dlnk, c)
+
+ts, ns = integrate(rhs, n_k, (0.0, 1.0),  0.0005, *rhs_args)
+
+plot_results(ts, ns, n_snap = 5, k = k, save_path = "outputs_transport/transport_results.png", show = False)
+
+
