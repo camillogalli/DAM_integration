@@ -33,14 +33,31 @@ def dndk(n, k, dlnk):
     n (array): Array of n values.
     dk (float): Step size in k-space.
     """
-    dn_dk = np.zeros_like(n)
-    dn_dk[1:-1] = (n[2:] - n[:-2]) / (2 * dlnk)
+    #dn_dk = np.zeros_like(n)
+    #dn_dk[1:-1] = (n[2:] - n[:-2]) / (2 * dlnk)
 
     # Handle the boundaries using forward and backward differences
-    dn_dk[0] = (n[1] - n[0]) / dlnk
-    dn_dk[-1] = (n[-1]- n[-2]) / dlnk
+    #dn_dk[0] = (n[1] - n[0]) / dlnk
+    #dn_dk[-1] = (n[-1]- n[-2]) / dlnk
 
-    return dn_dk/k
+    dn_dlnk = np.gradient(n, dlnk, edge_order=2)
+
+    return dn_dlnk/k
+
+def apply_standard_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6):
+    """
+    Apply standard boundary conditions to the array n.
+    Parameters:
+    n (array): Array of n values.
+    k (array): k-space array.
+    """
+
+    n = n.copy()
+    n[:buf_left] = n_left_fix
+
+    n[-buf_right:] = n[-buf_right-1]
+
+    return n
 
 def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 
@@ -55,34 +72,40 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
     n[:buf_left] = n_left_fix
 
     idx_fit = slice(-(buf_right + fit_points), -buf_right)
-    log_k_fit = np.log(k[idx_fit])
-    log_n_fit = np.log(n[idx_fit])
+    #log_k_fit = np.log(k[idx_fit])
+    k_fit = k[idx_fit]
+    #log_n_fit = np.log(n[idx_fit])
+    n_fit = n[idx_fit]
 
-    slope, intercept = np.polyfit(log_k_fit, log_n_fit, 1)
+    #slope, intercept = np.polyfit(log_k_fit, log_n_fit, 1)
+    slope, intercept = np.polyfit(k_fit, n_fit, 1)
 
-    log_k_tail = np.log(k[-buf_right:])
-    n[-buf_right:] = np.exp(slope * log_k_tail + intercept)
+    #log_k_tail = np.log(k[-buf_right:])
+    k_tail = k[-buf_right:]
+    #n[-buf_right:] = np.exp(slope * log_k_tail + intercept)
+    n[-buf_right:] = np.exp(slope * k_tail + intercept)
 
     return n
 
 def rhs(t, n, k, n_left_fix, dlnk , c):
     
-    n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2)
+    #n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2)
+    n = apply_standard_bc(n, k, n_left_fix, buf_left= 6, buf_right=6)
     dn = dndk(n, k, dlnk)
     dndt = c*dn
     dndt[:6] = 0.0
 
     return dndt
 
-def rk4_step(rhs, t, n, dt, *rhs_args):
-    k1 = rhs(t, n, *rhs_args)
-    k2 = rhs(t + dt/2, n + dt/2 * k1, *rhs_args)
-    k3 = rhs(t + dt/2, n + dt/2 * k2, *rhs_args)
-    k4 = rhs(t + dt,   n + dt   * k3, *rhs_args)
+def rk4_step(rhs, t, n, dt, n_left_fix, k, dlnk, c):
+    k1 = rhs(t, n, k, n_left_fix,  dlnk, c)
+    k2 = rhs(t + dt/2, n + dt/2 * k1, k, n_left_fix, dlnk, c )
+    k3 = rhs(t + dt/2, n + dt/2 * k2, k, n_left_fix, dlnk, c )
+    k4 = rhs(t + dt,   n + dt   * k3, k, n_left_fix, dlnk, c )
 
     return n + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
 
-def integrate(rhs, n0, t_span, dt, *rhs_args):
+def integrate(rhs, n0, t_span, dt, n_left_fix, k, dlnk, c):
     t0, tf = t_span
     n_step = int(np.ceil((tf-t0)/dt))
 
@@ -93,7 +116,8 @@ def integrate(rhs, n0, t_span, dt, *rhs_args):
     ns = [n.copy()]
 
     for _ in range(n_step):
-        n = rk4_step(rhs, t, n, dt, *rhs_args)
+        n = rk4_step(rhs, t, n, dt, n_left_fix, k, dlnk, c)
+
         t += dt
         ts.append(t)
         ns.append(n.copy())
