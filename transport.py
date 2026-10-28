@@ -44,6 +44,19 @@ def dndk(n, k, dlnk):
 
     return dn_dlnk/k
 
+def dndk_upwind(n, k, dlnk):
+    """
+    Calculate the derivative of n with respect to k using upwind scheme.
+    Parameters:
+    n (array): Array of n values.
+    dk (float): Step size in k-space.
+    """
+
+    dn_dk = np.zeros_like(n)
+    dn_dk[1:] = (n[1:] - n[:-1]) / dlnk
+
+    return dn_dk/k
+
 def apply_standard_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6):
     """
     Apply standard boundary conditions to the array n.
@@ -91,7 +104,8 @@ def rhs(t, n, k, n_left_fix, dlnk , c):
     
     #n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2)
     n = apply_standard_bc(n, k, n_left_fix, buf_left= 6, buf_right=6)
-    dn = dndk(n, k, dlnk)
+    #dn = dndk(n, k, dlnk)
+    dn = dndk_upwind(n, k, dlnk)
     dndt = c*dn
     dndt[:6] = 0.0
 
