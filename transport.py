@@ -85,28 +85,23 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
     n[:buf_left] = n_left_fix
 
     idx_fit = slice(-(buf_right + fit_points), -buf_right)
-    #log_k_fit = np.log(k[idx_fit])
-    k_fit = k[idx_fit]
-    #log_n_fit = np.log(n[idx_fit])
-    n_fit = n[idx_fit]
+    log_k_fit = np.log(k[idx_fit])
+    log_n_fit = np.log(n[idx_fit])
 
-    #slope, intercept = np.polyfit(log_k_fit, log_n_fit, 1)
-    slope, intercept = np.polyfit(k_fit, n_fit, 1)
+    slope, intercept = np.polyfit(log_k_fit, log_n_fit, 1)
 
-    #log_k_tail = np.log(k[-buf_right:])
-    k_tail = k[-buf_right:]
-    #n[-buf_right:] = np.exp(slope * log_k_tail + intercept)
-    n[-buf_right:] = np.exp(slope * k_tail + intercept)
+    log_k_tail = np.log(k[-buf_right:])
+    n[-buf_right:] = np.exp(slope * log_k_tail + intercept)
 
     return n
 
 def rhs(t, n, k, n_left_fix, dlnk , c):
     
-    #n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2)
-    n = apply_standard_bc(n, k, n_left_fix, buf_left= 6, buf_right=6)
-    #dn = dndk(n, k, dlnk)
-    dn = dndk_upwind(n, k, dlnk)
-    dndt = c*dn
+    n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 4)
+    #n = apply_standard_bc(n, k, n_left_fix, buf_left= 6, buf_right=6)
+    #dndk = dndk(n, k, dlnk)
+    dndk = dndk_upwind(n, k, dlnk)
+    dndt = c*dndk
     dndt[:6] = 0.0
 
     return dndt
@@ -138,15 +133,26 @@ def integrate(rhs, n0, t_span, dt, n_left_fix, k, dlnk, c):
 
     return np.array(ts), np.array(ns)
 
-def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
+def analytical_solution(k, t, c, A, p):
+    n = np.zeros_like(k)
+    k_shift = k+ c*t
 
+    n[k_shift > 0] = A * (k_shift[k_shift > 0]**p)
+    return n
+
+def plot_results(ts, ns, n_snap, k, c, save_path = None, show = True):
+
+    #n_analytical = analytical_solution(k, ts, c, 1.0, -5/6)
     n_snapshots = n_snap
     idx = np.linspace(0, len(ts) - 1, n_snapshots).astype(int)
     colors = plt.cm.viridis(np.linspace(0, 1, n_snapshots))
 
     fig, ax = plt.subplots()
     for i, j in enumerate(idx):
+        t = ts[j]
+        n_analytical = analytical_solution(k, t, c, 1.0, -5/6)
         ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2f}")
+        ax.plot(k, n_analytical, color = "red", ls = "--", label = f"Analytical t = {ts[j]:.2f}")
 
     ax.set_title("Numerical integration of the transport equation")
     ax.set_xscale("log")
