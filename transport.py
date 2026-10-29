@@ -133,26 +133,30 @@ def integrate(rhs, n0, t_span, dt, n_left_fix, k, dlnk, c):
 
     return np.array(ts), np.array(ns)
 
-def analytical_solution(k, t, c, A, p):
-    n = np.zeros_like(k)
-    k_shift = k+ c*t
+def analytical_solution(k, t, k_min, A, p):
+    #n = np.zeros_like(k)
+    #k_shift = k + c*t
 
-    n[k_shift > 0] = A * (k_shift[k_shift > 0]**p)
+    #n[k_shift > 0] = A * (k_shift[k_shift > 0]**p)
+
+    n = A * np.maximum(k - t, k_min) ** p
+
     return n
 
-def plot_results(ts, ns, n_snap, k, c, save_path = None, show = True):
+def plot_results(ts, ns, n_snap, k, k_min, save_path = None, show = True):
 
     #n_analytical = analytical_solution(k, ts, c, 1.0, -5/6)
     n_snapshots = n_snap
     idx = np.linspace(0, len(ts) - 1, n_snapshots).astype(int)
     colors = plt.cm.viridis(np.linspace(0, 1, n_snapshots))
+    colors_an = plt.cm.Reds(np.linspace(0.3, 1, n_snapshots))
 
     fig, ax = plt.subplots()
     for i, j in enumerate(idx):
         t = ts[j]
-        n_analytical = analytical_solution(k, t, c, 1.0, -5/6)
+        n_analytical = analytical_solution(k, t, k_min, 1.0, -5/6)
         ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2f}")
-        ax.plot(k, n_analytical, color = "red", ls = "--", label = f"Analytical t = {ts[j]:.2f}")
+        ax.plot(k, n_analytical, color = colors_an[i], ls = "--", label = f"Analytical t = {ts[j]:.2f}")
 
     ax.set_title("Numerical integration of the transport equation")
     ax.set_xscale("log")
