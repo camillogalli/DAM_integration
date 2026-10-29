@@ -2,7 +2,7 @@ from transport import k_space, initial_condition, rhs, apply_bc, dndk, integrate
 
 c = -1.0
 
-k, dlnk = k_space(1e-3, 10, 100)
+k, dlnk = k_space(1e-2, 10, 100)
 n_k = initial_condition(1.0, k, -5/6)
 rhs_args = (k, dlnk, c)
 n_left_fix = n_k[:6].copy()
