@@ -50,13 +50,14 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p):
 
     n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 4)
+    n = np.maximum(n, 1e-8)
+
     dndk = dndk_upwind(n, k, dlnk)
     d2ndk2 = d2ndk2_center(n, k, dlnk)
+    
+    N = np.trapezoid(n, k)
 
-    domain = np.linspace(k_min, k_max, 100)
-    N = np.trapezoid(domain**p, domain)
-
-    dndt = N*(-eta1 * (1/n) * dndk + eta1 * (k / (n ** 2)) * (dndk ** 2) - eta1 * (k/n) * d2ndk2 + eta2 * (2*k/(n ** 2)) * (dndk ** 2) - 2 * eta2 * ((k ** 2)/(n ** 3)) + 2 * eta2 * ((k ** 2)/(n ** 2)) * dndk * d2ndk2)
+    dndt = N * (-eta1 * (1/n) * dndk + eta1 * (k / (n ** 2)) * (dndk ** 2) - eta1 * (k/n) * d2ndk2 + eta2 * (2*k/(n ** 2)) * (dndk ** 2) - 2 * eta2 * ((k ** 2)/(n ** 3)) * (dndk ** 3) + 2 * eta2 * ((k ** 2)/(n ** 2)) * dndk * d2ndk2)
     dndt[:6] = 0.0
 
     return dndt
