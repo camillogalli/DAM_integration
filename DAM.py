@@ -23,7 +23,7 @@ def d2ndk2_center(n, k, dlnk):
     d2n_dlnk2 = np.zeros_like(n)
     dn_dlnk = np.zeros_like(n)
 
-    dn_dlnk = dndk_upwind(n, k, dlnk)
+    dn_dlnk = dndk_upwind(n, k, dlnk)*k
     d2n_dlnk2[1:-1] = (n[2:] - 2 * n[1:-1] + n[:-2]) / (dlnk ** 2)
 
     d2n_dk2 = d2n_dlnk2 - dn_dlnk
@@ -56,8 +56,17 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p):
     
     N = np.trapezoid(n, k)
 
-    dndt = - N * (-eta1 * (1/n) * dndk + eta1 * (k / (n ** 2)) * (dndk ** 2) - eta1 * (k/n) * d2ndk2 + eta2 * (2*k/(n ** 2)) * (dndk ** 2) - 2 * eta2 * ((k ** 2)/(n ** 3)) * (dndk ** 3) + 2 * eta2 * ((k ** 2)/(n ** 2)) * dndk * d2ndk2)
-    #dndt[:6] = 0.0
+    omega_k = k**0.5
+    domega_dk = 0.5 * (k**(-0.5))
+
+    Phi = -eta1 * k * dndk / n + eta2 * (k**2) * (dndk / n)**2
+
+    dndt_action = - (N**3) * (
+        -eta1 * (1/n) * dndk + eta1 * (k / (n**2)) * (dndk**2) - eta1 * (k/n) * d2ndk2 + eta2 * (2*k/(n**2)) * (dndk**2)
+          - 2 * eta2 * ((k**2)/(n**3)) * (dndk**3) + 2 * eta2 * ((k**2)/(n**2)) * dndk * d2ndk2
+        )
+    dndt = omega_k * dndt_action - N * domega_dk * Phi
+    dndt[:6] = 0.0
 
     return dndt
 
@@ -88,6 +97,7 @@ def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_ma
         ns.append(n.copy())
 
     return np.array(ts), np.array(ns)
+
 
 def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
 
