@@ -47,7 +47,7 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 
     return n
 
-def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p):
+def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max):
 
     n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 4)
 
@@ -70,15 +70,15 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p):
 
     return dndt
 
-def rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p):
-    k1 = rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p)
-    k2 = rhs(t + dt/2, n + dt/2 * k1, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p )
-    k3 = rhs(t + dt/2, n + dt/2 * k2, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p )
-    k4 = rhs(t + dt,   n + dt   * k3, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p )
+def rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max):
+    k1 = rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max)
+    k2 = rhs(t + dt/2, n + dt/2 * k1, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max )
+    k3 = rhs(t + dt/2, n + dt/2 * k2, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max )
+    k4 = rhs(t + dt,   n + dt   * k3, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max )
 
     return n + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
 
-def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p):
+def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max):
     t0, tf = t_span
     n_step = int(np.ceil((tf-t0)/dt))
 
@@ -89,7 +89,7 @@ def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_ma
     ns = [n.copy()]
 
     for _ in range(n_step):
-        n = rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, p)
+        n = rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max)
         n = np.maximum(n, 1e-5)
 
         t += dt
