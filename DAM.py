@@ -20,15 +20,12 @@ def dndk_upwind(n, k, dlnk):
 
 def d2ndk2_center(n, k, dlnk):
 
+    M = np.zeros_like(n)
+    M[1:] = (n[1:] - n[:-1]) / dlnk
     d2n_dlnk2 = np.zeros_like(n)
-    dn_dlnk = np.zeros_like(n)
+    d2n_dlnk2[1:-1] = (n[2:] - 2 * n[1:-1] + n[:-2]) / dlnk ** 2
 
-    dn_dlnk = dndk_upwind(n, k, dlnk)*k
-    d2n_dlnk2[1:-1] = (n[2:] - 2 * n[1:-1] + n[:-2]) / (dlnk**2)
-
-    d2n_dk2 = (d2n_dlnk2 - dn_dlnk) / (k**2)
-
-    return d2n_dk2
+    return (d2n_dlnk2 - M) / (k**2)
 
 
 def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
@@ -36,6 +33,7 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
     n = n.copy()
 
     n[:buf_left] = n_left_fix
+
     idx_fit = slice(-(buf_right + fit_points), -buf_right)
     log_k_fit = np.log(k[idx_fit])
     log_n_fit = np.log(n[idx_fit])
@@ -50,6 +48,7 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2):
 
     n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 4)
+    n = np.maximum(n, 1e-10)
 
     dndk = dndk_upwind(n, k, dlnk)
     d2ndk2 = d2ndk2_center(n, k, dlnk)
@@ -103,7 +102,7 @@ def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2):
     for _ in range(n_step):
         #n = rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2)
         n = crank_nicolson_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, n_iter = 4)
-        n = np.maximum(n, 1e-2)
+        n = np.maximum(n, 1)
 
         t += dt
         ts.append(t)
