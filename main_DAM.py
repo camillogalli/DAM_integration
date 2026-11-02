@@ -14,7 +14,7 @@ r0 = rhs(0, n_k, k, n_left_fix, dlnk, eta1, eta2)
 print("max |rhs| iniziale:", np.max(np.abs(r0)))
 print("rhs finito ovunque:", np.all(np.isfinite(r0)))
 
-t_eval = np.linspace(0.0, 0.1, 100001)
+t_eval = np.linspace(0.0, 1.0, 100001)
 
 ns = solve_ivp(rhs, (0, t_eval[-1]), n_k, args=(k, n_left_fix, dlnk, eta1, eta2),
                  method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
