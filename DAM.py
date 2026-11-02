@@ -66,7 +66,7 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2):
         )
     dndt = omega_k * dndt_action - (N**3) * domega_dk * Phi
     dndt[:6] = 0.0
-    dndt[-1:] = 0.0
+    #dndt[-1:] = 0.0
 
     return dndt
 
@@ -114,7 +114,8 @@ def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2):
 def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
 
     n_snapshots = n_snap
-    n_kz = initial_condition(1.0, k, -5/6)
+    n_kz = initial_condition(1.0*k[0]**(1/6), k, -5/6)
+    
     idx = np.linspace(0, len(ts) - 1, n_snapshots).astype(int)
     colors = plt.cm.viridis(np.linspace(0, 1, n_snapshots))
 
