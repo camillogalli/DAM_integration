@@ -67,6 +67,7 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max):
         )
     dndt = omega_k * dndt_action - N * domega_dk * Phi
     dndt[:6] = 0.0
+    dndt[-1:] = 0.0
 
     return dndt
 
@@ -77,6 +78,17 @@ def rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max):
     k4 = rhs(t + dt,   n + dt   * k3, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max )
 
     return n + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
+
+def crank_nicolson_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, n_iter = 4):
+    f_n = rhs(t, n, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max)             
+
+    n_next = n + dt * f_n                    
+
+    for _ in range(n_iter):
+        f_next = rhs(t + dt, n_next, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max)  
+        n_next = n + (dt/2) * (f_n + f_next)  
+
+    return n_next
 
 def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max):
     t0, tf = t_span
@@ -89,7 +101,8 @@ def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_ma
     ns = [n.copy()]
 
     for _ in range(n_step):
-        n = rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max)
+        #n = rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max)
+        n = crank_nicolson_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, k_min, k_max, n_iter = 4)
         n = np.maximum(n, 1e-5)
 
         t += dt
