@@ -5,7 +5,7 @@ from scipy.integrate import solve_ivp
 eta1 = 216
 eta2 = 162
 
-k, dlnk = k_space(1e-3, 10, 300)
+k, dlnk = k_space(1e-3, 5, 300)
 n_k = initial_condition(1.0, k, -2/3)
 n_left_fix = n_k[:6].copy()
 
@@ -14,7 +14,7 @@ r0 = rhs(0, n_k, k, n_left_fix, dlnk, eta1, eta2)
 print("max |rhs| iniziale:", np.max(np.abs(r0)))
 print("rhs finito ovunque:", np.all(np.isfinite(r0)))
 
-t_eval = np.linspace(0.0, 1.0, 100000)
+t_eval = np.linspace(0.0, 1.0, 1000001)
 
 ns = solve_ivp(rhs, (0, t_eval[-1]), n_k, args=(k, n_left_fix, dlnk, eta1, eta2),
                  method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
@@ -35,4 +35,4 @@ ns.t[
 #ts, ns = integrate(rhs, n_k, (0.0, 0.1),  1e-6, k, n_left_fix, dlnk, eta1, eta2)
 
 #plot_results(ts, ns, n_snap = 5, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
-plot_results(ns.t, ns.y.T, n_snap = 5, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
+plot_results(ns.t, ns.y.T, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
