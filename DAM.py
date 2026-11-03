@@ -122,7 +122,7 @@ def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
     fig, ax = plt.subplots()
     for i, j in enumerate(idx):
         t = ts[j]
-        ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2f}")
+        ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2e}")
     ax.plot(k, n_kz, color = "black", label = "Soluzione di Kolmogorov - Zakharov", ls = "--")
 
     ax.set_title("Numerical integration of our MMT differential model")

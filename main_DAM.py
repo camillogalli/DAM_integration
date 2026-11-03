@@ -28,10 +28,6 @@ p_final = np.mean(p_final[135:165])
 
 print("errore relativo sull'ultimo esponente di power law: ", np.abs(p_final + 5/6))
 
-ns.t[
-    np.linspace(0, len(ns.t)-1, 5, dtype=int)
-]
-
 #ts, ns = integrate(rhs, n_k, (0.0, 0.1),  1e-6, k, n_left_fix, dlnk, eta1, eta2)
 
 #plot_results(ts, ns, n_snap = 5, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
