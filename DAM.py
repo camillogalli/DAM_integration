@@ -12,6 +12,10 @@ def initial_condition(A, k, p):
 
     return A * (k**(p))
 
+def initial_condition_gaussian(A, k, k0, eps, sigma_ln, p):
+
+    return A * (k**p) * (1 + eps * np.exp(-(np.log(k) - np.log(k0))**2 / (2 * sigma_ln**2)))
+
 def dndk_upwind(n, k, dlnk):
 
     dn_dlnk = np.zeros_like(n)

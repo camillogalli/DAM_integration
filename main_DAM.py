@@ -1,5 +1,5 @@
 import numpy as np
-from DAM import integrate, plot_results, k_space, initial_condition, rhs, integrate_chunked, apply_bc
+from DAM import integrate, plot_results, k_space, initial_condition, rhs, integrate_chunked, apply_bc, initial_condition_gaussian
 from scipy.integrate import solve_ivp
 
 eta1 = 216
@@ -7,14 +7,10 @@ eta2 = 162
 p = -2/3
 
 k, dlnk = k_space(1e-3, 1, 300)
-n_k = initial_condition(1.0, k, p)
-n_left_fix = n_k[:6].copy()
-
-k0 = k[15]          
-sigma_ln = 0.3      
-eps = 0.5  
-
-n0 = k**p * (1 + eps * np.exp(-(np.log(k) - np.log(k0))**2 / (2 * sigma_ln**2)))
+k0 = k[15] 
+n_k = initial_condition(1.0, k, -2/3)
+n_k_gaus = initial_condition_gaussian(1.0, k, k0, 0.5, 0.3, -2/3)
+n_left_fix = n_k[:6].copy() 
 
 print("Test valutazione singola del rhs:")
 r0 = rhs(0, n_k, k, n_left_fix, dlnk, eta1, eta2)
@@ -27,7 +23,7 @@ print("rhs finito ovunque:", np.all(np.isfinite(r0)))
 #                 method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
 
 ts, ns = integrate_chunked(
-    rhs, n0, (0.0, 1), dt_chunk=1e-7,
+    rhs, n_k, (0.0, 1), dt_chunk=1e-7,
     apply_bc_func=apply_bc,
     bc_args=(k, n_left_fix, 6, 6, 8),
     rhs_args=(k, n_left_fix, dlnk, eta1, eta2),
