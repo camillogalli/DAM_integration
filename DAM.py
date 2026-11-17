@@ -152,7 +152,7 @@ def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
     idx = np.linspace(0, len(ts) - 1, n_snapshots).astype(int)
     colors = plt.cm.viridis(np.linspace(0, 1, n_snapshots))
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12,6))
     for i, j in enumerate(idx):
         t = ts[j]
         ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2e}")

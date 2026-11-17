@@ -5,16 +5,14 @@ from scipy.integrate import solve_ivp
 eta1 = 216
 eta2 = 162
 
-k, dlnk = k_space(1e-3, 5, 300)
-k0 = k[15] 
-n_k = initial_condition(1.0, k, -2/3)
-n_k_gaus = initial_condition_gaussian(1.0, k, k0, 0.5, 0.3, -2/3)
-n_left_fix = n_k[:6].copy() 
+k, dlnk = k_space(1e-3, 5, 500)
+k0 = k[25] 
 
-print("Test valutazione singola del rhs:")
-r0 = rhs(0, n_k, k, n_left_fix, dlnk, eta1, eta2)
-print("max |rhs| iniziale:", np.max(np.abs(r0)))
-print("rhs finito ovunque:", np.all(np.isfinite(r0)))
+n_k = initial_condition(1.0, k, -2/3)
+n_k_gaus = initial_condition_gaussian(1.0, k, k0, 1.5, 0.3, -2/3)
+
+n_left_fix = n_k[:6].copy() 
+n_left_fix_g = n_k_gaus[:6].copy()
 
 #t_eval = np.linspace(0.0, 1.0, 1000001)
 
@@ -22,18 +20,18 @@ print("rhs finito ovunque:", np.all(np.isfinite(r0)))
 #                 method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
 
 ts, ns = integrate_chunked(
-    rhs, n_k, (0.0, 1.0), dt_chunk=1e-6,
+    rhs, n_k, (0.0, 1.0), dt_chunk=1e-7,
     apply_bc_func=apply_bc,
-    bc_args=(k, n_left_fix, 6, 6, 8),
+    bc_args=(k, n_left_fix, 6, 6, 4),
     rhs_args=(k, n_left_fix, dlnk, eta1, eta2),
     rtol=1e-6, atol=1e-10
 )
 
 tsg, nsg = integrate_chunked(
-    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-6,
+    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-7,
     apply_bc_func=apply_bc,
-    bc_args=(k, n_left_fix, 6, 6, 8),
-    rhs_args=(k, n_left_fix, dlnk, eta1, eta2),
+    bc_args=(k, n_left_fix_g, 6, 6, 4),
+    rhs_args=(k, n_left_fix_g, dlnk, eta1, eta2),
     rtol=1e-6, atol=1e-10
 )
 
