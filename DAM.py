@@ -136,7 +136,7 @@ def integrate_chunked(rhs, n0, t_span, dt_chunk, apply_bc_func, bc_args, rhs_arg
             print(f"interruzione a t={t_current}: {sol.message}")
             break
 
-        n_current = apply_bc_func(sol.y[:, -1], *bc_args)   # <- l'intervento che volevi
+        n_current = apply_bc_func(sol.y[:, -1], *bc_args)  
         t_current = t_next
 
         ts_all.append(t_current)

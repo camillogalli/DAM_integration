@@ -4,9 +4,8 @@ from scipy.integrate import solve_ivp
 
 eta1 = 216
 eta2 = 162
-p = -2/3
 
-k, dlnk = k_space(1e-3, 1, 300)
+k, dlnk = k_space(1e-3, 5, 300)
 k0 = k[15] 
 n_k = initial_condition(1.0, k, -2/3)
 n_k_gaus = initial_condition_gaussian(1.0, k, k0, 0.5, 0.3, -2/3)
@@ -23,17 +22,19 @@ print("rhs finito ovunque:", np.all(np.isfinite(r0)))
 #                 method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
 
 ts, ns = integrate_chunked(
-    rhs, n_k, (0.0, 1), dt_chunk=1e-7,
+    rhs, n_k, (0.0, 1.0), dt_chunk=1e-6,
     apply_bc_func=apply_bc,
     bc_args=(k, n_left_fix, 6, 6, 8),
     rhs_args=(k, n_left_fix, dlnk, eta1, eta2),
+    rtol=1e-6, atol=1e-10
 )
 
 tsg, nsg = integrate_chunked(
-    rhs, n_k_gaus, (0.0, 1), dt_chunk=1e-7,
+    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-6,
     apply_bc_func=apply_bc,
     bc_args=(k, n_left_fix, 6, 6, 8),
     rhs_args=(k, n_left_fix, dlnk, eta1, eta2),
+    rtol=1e-6, atol=1e-10
 )
 
 #print("positiva ovunque:", np.all(ns.y > 0))
