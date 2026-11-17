@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 
 def k_space(k_min, k_max, n_points):
 
@@ -66,7 +67,7 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2):
         )
     dndt = omega_k * dndt_action - (N**3) * domega_dk * Phi
     dndt[:6] = 0.0
-    #dndt[-1:] = 0.0
+    dndt[-6:] = 0.0
 
     return dndt
 
@@ -102,6 +103,7 @@ def integrate(rhs, n0, t_span, dt, k, n_left_fix, dlnk , eta1, eta2):
     for _ in range(n_step):
         #n = rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2)
         n = crank_nicolson_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2, n_iter = 4)
+        n = apply_bc(n, k, n_left_fix, buf_left=6, buf_right=6, fit_points=4)
         n = np.maximum(n, 1)
 
         t += dt
@@ -138,3 +140,32 @@ def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
     if show:
         plt.show()
     plt.close()
+
+
+def integrate_chunked(rhs, n0, t_span, dt_chunk, apply_bc_func, bc_args, rhs_args, rtol=1e-6, atol=1e-10):
+    t0, tf = t_span
+    n_chunks = int(np.ceil((tf - t0) / dt_chunk))
+
+    t_current = t0
+    n_current = n0.copy()
+
+    ts_all = [t_current]
+    ns_all = [n_current.copy()]
+
+    for _ in range(n_chunks):
+        t_next = min(t_current + dt_chunk, tf)
+
+        sol = solve_ivp(rhs, (t_current, t_next), n_current, args=rhs_args,
+                         method="BDF", rtol=rtol, atol=atol)
+
+        if not sol.success:
+            print(f"interruzione a t={t_current}: {sol.message}")
+            break
+
+        n_current = apply_bc_func(sol.y[:, -1], *bc_args)   # <- l'intervento che volevi
+        t_current = t_next
+
+        ts_all.append(t_current)
+        ns_all.append(n_current.copy())
+
+    return np.array(ts_all), np.array(ns_all)
