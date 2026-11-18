@@ -71,7 +71,7 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2):
         )
     dndt = omega_k * dndt_action - (N**3) * domega_dk * Phi
     dndt[:6] = 0.0
-    dndt[-6:] = 0.0
+    #dndt[-6:] = 0.0
 
     return dndt
 
