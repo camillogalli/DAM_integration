@@ -28,11 +28,11 @@ ts, ns = integrate_chunked(
 )
 
 tsg, nsg = integrate_chunked(
-    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-7,
+    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-8,
     apply_bc_func=apply_bc,
     bc_args=(k, n_left_fix_g, 6, 6, 4),
     rhs_args=(k, n_left_fix_g, dlnk, eta1, eta2),
-    rtol=1e-6, atol=1e-10
+    rtol=1e-5, atol=1e-10
 )
 
 #print("positiva ovunque:", np.all(ns.y > 0))
