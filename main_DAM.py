@@ -51,6 +51,6 @@ print("errore relativo sull'ultimo esponente di power law: ", np.abs(p_final + 5
 
 #ts, ns = integrate(rhs, n_k, (0.0, 0.1),  1e-6, k, n_left_fix, dlnk, eta1, eta2)
 
-plot_results(ts, ns, n_snap = 5, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
-plot_results(tsg, nsg, n_snap = 5, k = k, save_path = "outputs_DAM/DAM_results_gaussian_bump.png", show = False)
+plot_results(ts, ns, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
+plot_results(tsg, nsg, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results_gaussian_bump.png", show = False)
 #plot_results(ns.t, ns.y.T, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
