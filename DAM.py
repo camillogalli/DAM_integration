@@ -26,7 +26,7 @@ def dndk_upwind(n, k, dlnk):
 def d2ndk2_center(n, k, dlnk):
 
     M = np.zeros_like(n)
-    M[1:] = (n[1:] - n[:-1]) / dlnk
+    M[1:-1] = (n[2:]-n[:-2]) / (2*dlnk)
     d2n_dlnk2 = np.zeros_like(n)
     d2n_dlnk2[1:-1] = (n[2:] - 2 * n[1:-1] + n[:-2]) / dlnk ** 2
 
@@ -53,7 +53,7 @@ def apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 2):
 def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2):
 
     n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 4)
-    n = np.maximum(n, 1e-10)
+    #n = np.maximum(n, 1e-10)
 
     dndk = dndk_upwind(n, k, dlnk)
     d2ndk2 = d2ndk2_center(n, k, dlnk)

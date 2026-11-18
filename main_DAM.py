@@ -6,10 +6,10 @@ eta1 = 216
 eta2 = 162
 
 k, dlnk = k_space(1e-3, 5, 300)
-k0 = k[25] 
+k0 = k[135] 
 
-n_k = initial_condition(1.0, k, -2/3)
-n_k_gaus = initial_condition_gaussian(1.0, k, k0, 1.5, 0.3, -2/3)
+n_k = initial_condition(1.0, k, -5/6)
+n_k_gaus = initial_condition_gaussian(1.0, k, k0, 0.6, 0.1, -5/6)
 
 n_left_fix = n_k[:6].copy() 
 n_left_fix_g = n_k_gaus[:6].copy()
@@ -28,7 +28,7 @@ ts, ns = integrate_chunked(
 )
 
 tsg, nsg = integrate_chunked(
-    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-7,
+    rhs, n_k_gaus, (0.0, 1.0), dt_chunk=1e-8,
     apply_bc_func=apply_bc,
     bc_args=(k, n_left_fix_g, 6, 6, 4),
     rhs_args=(k, n_left_fix_g, dlnk, eta1, eta2),
