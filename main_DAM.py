@@ -5,7 +5,7 @@ from scipy.integrate import solve_ivp
 eta1 = 216
 eta2 = 162
 
-k, dlnk = k_space(1e-3, 5, 300)
+k, dlnk = k_space(1e-3, 5, 500)
 k0 = k[135] 
 
 n_k = initial_condition(1.0, k, -2/3)
