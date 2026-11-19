@@ -173,8 +173,8 @@ def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
     for i, j in enumerate(idx):
         t = ts[j]
         ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2e}")
-    ax.plot(k, n_kz, color = "black", label = "Soluzione di Kolmogorov - Zakharov, Energia", ls = "--")
-    ax.plot(k, n_kz_a, color = "grey", label = "Soluzione di Kolmogorov - Zakharov, Azione", ls = "--")
+    ax.plot(k, n_kz, color = "black", label = "Kolmogorov - Zakharov Solution, Energy", ls = "--")
+    ax.plot(k, n_kz_a, color = "grey", label = "Kolmogorov - Zakharov Solution, Action", ls = "--")
 
     ax.set_title("Numerical integration of MMT differential model")
     ax.set_xscale("log")
