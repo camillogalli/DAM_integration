@@ -75,6 +75,22 @@ def rhs(t, n, k, n_left_fix, dlnk , eta1, eta2):
 
     return dndt
 
+def rhs_action(t, n, k, n_left_fix, dlnk , eta1, eta2):
+    n = apply_bc(n, k, n_left_fix, buf_left = 6, buf_right = 6, fit_points = 4)
+
+    dndk = dndk_upwind(n, k, dlnk)
+    d2ndk2 = d2ndk2_center(n, k, dlnk)
+        
+    N = np.trapezoid(n, k)
+
+    dndt_action = - (N**3) * (
+        -eta1 * (1/n) * dndk + eta1 * (k / (n**2)) * (dndk**2) - eta1 * (k/n) * d2ndk2 + eta2 * (2*k/(n**2)) * (dndk**2)
+            - 2 * eta2 * ((k**2)/(n**3)) * (dndk**3) + 2 * eta2 * ((k**2)/(n**2)) * dndk * d2ndk2
+        )
+    dndt_action[:6] = 0.0
+
+    return dndt_action
+
 def rk4_step(rhs, t, n, dt, k, n_left_fix, dlnk , eta1, eta2):
     k1 = rhs(t, n, k, n_left_fix, dlnk , eta1, eta2)
     k2 = rhs(t + dt/2, n + dt/2 * k1, k, n_left_fix, dlnk , eta1, eta2)
@@ -148,6 +164,7 @@ def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
 
     n_snapshots = n_snap
     n_kz = initial_condition(1.0*k[0]**(1/6), k, -5/6)
+    n_kz_a = initial_condition(1, k, -2/3)
     
     idx = np.linspace(0, len(ts) - 1, n_snapshots).astype(int)
     colors = plt.cm.viridis(np.linspace(0, 1, n_snapshots))
@@ -156,14 +173,15 @@ def plot_results(ts, ns, n_snap, k, save_path = None, show = True):
     for i, j in enumerate(idx):
         t = ts[j]
         ax.plot(k, ns[j], color=colors[i], label=f"t = {ts[j]:.2e}")
-    ax.plot(k, n_kz, color = "black", label = "Soluzione di Kolmogorov - Zakharov", ls = "--")
+    ax.plot(k, n_kz, color = "black", label = "Soluzione di Kolmogorov - Zakharov, Energia", ls = "--")
+    ax.plot(k, n_kz_a, color = "grey", label = "Soluzione di Kolmogorov - Zakharov, Azione", ls = "--")
 
-    ax.set_title("Numerical integration of our MMT differential model")
+    ax.set_title("Numerical integration of MMT differential model")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("k")
     ax.set_ylabel(r"$n_k$")
-    ax.legend()
+    ax.legend(loc= "lower left")
     ax.grid(True, which="both", ls="--", lw=0.4)
 
     if save_path:
