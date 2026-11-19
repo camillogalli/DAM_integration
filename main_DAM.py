@@ -21,13 +21,20 @@ n_left_fix_action = n_k_action[:6].copy()
 #ns = solve_ivp(rhs, (0, t_eval[-1]), n_k, args=(k, n_left_fix, dlnk, eta1, eta2),
 #                 method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
 
+print("************************* Starting the simulation ************************* ")
+print("\n")
+
 ts, ns = integrate_chunked(
-    rhs_action, n_k, (0.0, 1.0), dt_chunk=1e-6,
+    rhs, n_k, (0.0, 1.0), dt_chunk=1e-6,
     apply_bc_func=apply_bc,
     bc_args=(k, n_left_fix, 6, 6, 4),
     rhs_args=(k, n_left_fix, dlnk, eta1, eta2),
     rtol=1e-6, atol=1e-10
 )
+
+print("\n")
+print(".............. Simulation ongoing ..............")
+print("\n")
 
 tsg, nsg = integrate_chunked(
     rhs, n_k_gaus, (0.0, 2e-4), dt_chunk=1e-8,
@@ -37,6 +44,11 @@ tsg, nsg = integrate_chunked(
     rtol=1e-5, atol=1e-10
 )
 
+print("\n")
+print(".............. Simulation ongoing ..............")
+print("\n")
+
+
 tsa, nsa = integrate_chunked(
     rhs_action, n_k_action, (0.0, 1.0), dt_chunk=1e-6,
     apply_bc_func=apply_bc,
@@ -44,6 +56,11 @@ tsa, nsa = integrate_chunked(
     rhs_args=(k, n_left_fix_action, dlnk, eta1, eta2),
     rtol=1e-5, atol=1e-10
 )
+
+print("************************* Simulation completed ************************* ")
+print("\n")
+print("----------------------- Plotting Results ------------------------------- ")
+print("\n")
 
 ln_k = np.log(k)
 #p_final = np.gradient(np.log(np.maximum(ns.y[:, -1], 1e-30)), ln_k)
