@@ -21,6 +21,7 @@ n_left_fix_action = n_k_action[:6].copy()
 #ns = solve_ivp(rhs, (0, t_eval[-1]), n_k, args=(k, n_left_fix, dlnk, eta1, eta2),
 #                 method="BDF", t_eval=t_eval, rtol=1e-6, atol=1e-10)
 
+print("\n")
 print("************************* Starting the simulation ************************* ")
 print("\n")
 
