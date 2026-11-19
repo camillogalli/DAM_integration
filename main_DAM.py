@@ -45,18 +45,18 @@ tsg, nsg = integrate_chunked(
     rtol=1e-5, atol=1e-10
 )
 
-print("\n")
-print(".............. Simulation ongoing ..............")
-print("\n")
+#print("\n")
+#print(".............. Simulation ongoing ..............")
+#print("\n")
 
 
-tsa, nsa = integrate_chunked(
-    rhs_action, n_k_action, (0.0, 1.0), dt_chunk=1e-6,
-    apply_bc_func=apply_bc,
-    bc_args=(k, n_left_fix_action, 6, 6, 4),
-    rhs_args=(k, n_left_fix_action, dlnk, eta1, eta2),
-    rtol=1e-5, atol=1e-10
-)
+#tsa, nsa = integrate_chunked(
+#    rhs_action, n_k_action, (0.0, 1.0), dt_chunk=1e-6,
+#    apply_bc_func=apply_bc,
+#    bc_args=(k, n_left_fix_action, 6, 6, 4),
+#    rhs_args=(k, n_left_fix_action, dlnk, eta1, eta2),
+#    rtol=1e-5, atol=1e-10
+#)
 
 print("************************* Simulation completed ************************* ")
 print("\n")
@@ -76,5 +76,5 @@ print("errore relativo sull'ultimo esponente di power law: ", np.abs(p_final + 5
 
 plot_results(ts, ns, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
 plot_results(tsg, nsg, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results_gaussian_bump.png", show = False)
-plot_results(tsa, nsa, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results_action.png", show = False)
+#plot_results(tsa, nsa, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results_action.png", show = False)
 #plot_results(ns.t, ns.y.T, n_snap = 7, k = k, save_path = "outputs_DAM/DAM_results.png", show = False)
